@@ -1,5 +1,5 @@
 import { Telegraf, Markup } from 'telegraf'
-import type { Settings, Task } from '@/types'
+import type { Settings, Task, ScheduleLesson } from '@/types'
 import { supabase } from './supabase'
 import { addSingleTask } from './planner'
 import { getScheduleForDay } from './schedule'
