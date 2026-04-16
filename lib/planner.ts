@@ -10,7 +10,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Task, Settings, ScheduleLesson } from '@/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
 interface PlannerTask {
   title: string
@@ -111,9 +111,26 @@ ${existingText}
 
 Разбери задачи и расставь по времени.`
 
-  const fullPrompt = buildSystemPrompt(settings, schedule) + '\n\n' + userPrompt
-  const result = await model.generateContent(fullPrompt)
-  const raw = result.response.text()
+  const res = await fetch(GROQ_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: buildSystemPrompt(settings, schedule) },
+        { role: 'user', content: userPrompt },
+      ],
+      max_tokens: 1024,
+      temperature: 0.3,
+    }),
+  })
+
+  if (!res.ok) throw new Error(`Groq API error: ${res.status} ${await res.text()}`)
+  const data = await res.json()
+  const raw: string = data.choices?.[0]?.message?.content ?? ''
 
   try {
     const cleaned = raw.replace(/```json|```/g, '').trim()
