@@ -1,21 +1,17 @@
 /**
- * AI-планировщик на базе Google Gemini Flash
- * Бесплатный тариф: 15 RPM, 1M токенов/день
- * Получить ключ: https://aistudio.google.com/app/apikey
- *
- * Принимает свободный текст → возвращает структурированные задачи с временем
+ * AI-планировщик на базе Groq (бесплатно, быстро)
+ * Получить ключ: https://console.groq.com
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Task, Settings, ScheduleLesson } from '@/types'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODEL = 'llama-3.3-70b-versatile'  // или 'llama3-8b-8192', 'mixtral-8x7b-32768'
 
 interface PlannerTask {
   title: string
-  remind_at: string | null    // ISO datetime или null
-  deadline: string | null     // YYYY-MM-DD или null
+  remind_at: string | null
+  deadline: string | null
   priority: 1 | 2 | 3
   estimated_min: number | null
 }
@@ -25,13 +21,10 @@ interface PlannerInput {
   settings: Settings
   existingTasks: Task[]
   schedule: ScheduleLesson[]
-  targetDate: string           // YYYY-MM-DD
-  currentTime: string          // "14:30"
+  targetDate: string
+  currentTime: string
 }
 
-/**
- * Строим системный промпт с профилем пользователя
- */
 function buildSystemPrompt(settings: Settings, schedule: ScheduleLesson[]): string {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
@@ -54,7 +47,7 @@ function buildSystemPrompt(settings: Settings, schedule: ScheduleLesson[]): stri
 - Обед: ${settings.lunch_start}, ~${settings.lunch_duration_min} минут
 - Спорт/прогулки: ${settings.sport_days.map(d => days.indexOf(d) >= 0 ? ['вс','пн','вт','ср','чт','пт','сб'][days.indexOf(d)] : d).join(', ')} в ${settings.sport_time} (~${settings.sport_duration_min} мин) — НЕ ТРОГАТЬ
 - Учёба/олимпиады: ${settings.study_days.map(d => days.indexOf(d) >= 0 ? ['вс','пн','вт','ср','чт','пт','сб'][days.indexOf(d)] : d).join(', ')} в ${settings.study_time} (~${settings.study_duration_min} мин) — НЕ ТРОГАТЬ
-- Деятельность: разработка (Next.js, Supabase), предпринимательство, учёба
+- Деятельность: разработка, предпринимательство, учёба
 
 ## Правила подъёма по парам
 ${wakeRules}
@@ -88,9 +81,6 @@ ${scheduleText}
 }`
 }
 
-/**
- * Парсим задачи из свободного текста пользователя
- */
 export async function planTasks(input: PlannerInput): Promise<{
   tasks: PlannerTask[]
   comment: string
@@ -145,9 +135,6 @@ ${existingText}
   }
 }
 
-/**
- * Добавить одну задачу в течение дня (команда /add или текст боту)
- */
 export async function addSingleTask(
   text: string,
   settings: Settings,
