@@ -1,5 +1,5 @@
 import { Telegraf, Markup } from 'telegraf'
-import type { Settings, Task, ScheduleLesson } from '@/types'
+import type { Settings, Task } from '@/types'
 import { supabase } from './supabase'
 import { addSingleTask } from './planner'
 import { getScheduleForDay } from './schedule'
@@ -39,6 +39,7 @@ function formatTaskForMessage(task: Task, tz: string): string {
 
 // /start
 bot.start((ctx) => {
+  console.log('[bot] /start from', ctx.chat.id)
   ctx.reply(
     '👋 Привет! Я твой планировщик.\n\n' +
     'Просто напиши мне задачи в свободной форме — расставлю их по времени.\n\n' +
@@ -54,6 +55,7 @@ bot.start((ctx) => {
 
 // /list
 bot.command('list', async (ctx) => {
+  console.log('[bot] /list from', ctx.chat.id)
   try {
     const settings = await getSettings()
     const today = new Date().toLocaleDateString('sv', { timeZone: settings.timezone })
@@ -66,7 +68,8 @@ bot.command('list', async (ctx) => {
     const lines = tasks.map(t => formatTaskForMessage(t, settings.timezone))
     ctx.reply(`📋 *Задачи на сегодня:*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' })
   } catch (e) {
-    ctx.reply('Ошибка при загрузке задач')
+    console.error('[bot] /list error:', e)
+    ctx.reply('Ошибка: ' + String(e))
   }
 })
 
@@ -86,7 +89,8 @@ bot.command('schedule', async (ctx) => {
     )
     ctx.reply(`🎓 *Расписание на сегодня:*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' })
   } catch (e) {
-    ctx.reply('Ошибка при загрузке расписания')
+    console.error('[bot] /schedule error:', e)
+    ctx.reply('Ошибка: ' + String(e))
   }
 })
 
@@ -123,7 +127,8 @@ bot.command('add', async (ctx) => {
 
     ctx.reply(`${lines.join('\n')}\n\n💬 ${comment}`)
   } catch (e) {
-    ctx.reply('Ошибка при добавлении задачи')
+    console.error('[bot] /add error:', e)
+    ctx.reply('Ошибка: ' + String(e))
   }
 })
 
@@ -161,7 +166,8 @@ bot.on('text', async (ctx) => {
 
     ctx.reply(`${lines.join('\n')}\n\n💬 ${comment}`)
   } catch (e) {
-    ctx.reply('Ошибка')
+    console.error('[bot] text handler error:', e)
+    ctx.reply('Ошибка: ' + String(e))
   }
 })
 
