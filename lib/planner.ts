@@ -5,8 +5,8 @@
 
 import type { Task, Settings, ScheduleLesson } from '@/types'
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = 'llama-3.3-70b-versatile'  // или 'llama3-8b-8192', 'mixtral-8x7b-32768'
+const GROQ_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const GROQ_MODEL = 'meta-llama/llama-3.1-8b-instruct:free'
 
 interface PlannerTask {
   title: string
@@ -105,7 +105,8 @@ ${existingText}
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'HTTP-Referer': 'https://task-agent-beta.vercel.app',
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
