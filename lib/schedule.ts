@@ -116,7 +116,9 @@ export async function syncSchedule(
 
   for (const { group, source } of sources) {
     try {
+      console.log('[schedule] Fetching', source, 'group:', group)
       const days_data = await fetchScheduleJson(group, from, to)
+      console.log('[schedule] Got', days_data.length, 'days for', source)
       const lessons: ScheduleLesson[] = []
 
       for (const day of days_data) {
@@ -145,9 +147,10 @@ export async function syncSchedule(
       }
 
       if (lessons.length === 0) {
-        console.warn(`No lessons for ${source} group ${group}`)
+        console.warn('[schedule] No lessons for', source, 'group:', group)
         continue
       }
+      console.log('[schedule] Inserting', lessons.length, 'lessons for', source)
 
       const { error } = await supabase
         .from('schedule_cache')
@@ -156,7 +159,7 @@ export async function syncSchedule(
       if (error) throw error
       console.log(`Synced ${lessons.length} lessons for ${source}`)
     } catch (err) {
-      console.error(`Failed to sync ${source}:`, err)
+      console.error('[schedule] Failed to sync', source, err instanceof Error ? err.message : String(err))
     }
   }
 }

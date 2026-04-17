@@ -69,7 +69,7 @@ bot.command('list', async (ctx) => {
     ctx.reply(`📋 *Задачи на сегодня:*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' })
   } catch (e) {
     console.error('[bot] /list error:', e)
-    ctx.reply('Ошибка: ' + String(e))
+    ctx.reply('Ошибка: ' + (e instanceof Error ? e.message : JSON.stringify(e)))
   }
 })
 
@@ -90,7 +90,7 @@ bot.command('schedule', async (ctx) => {
     ctx.reply(`🎓 *Расписание на сегодня:*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' })
   } catch (e) {
     console.error('[bot] /schedule error:', e)
-    ctx.reply('Ошибка: ' + String(e))
+    ctx.reply('Ошибка: ' + (e instanceof Error ? e.message : JSON.stringify(e)))
   }
 })
 
@@ -128,7 +128,7 @@ bot.command('add', async (ctx) => {
     ctx.reply(`${lines.join('\n')}\n\n💬 ${comment}`)
   } catch (e) {
     console.error('[bot] /add error:', e)
-    ctx.reply('Ошибка: ' + String(e))
+    ctx.reply('Ошибка: ' + (e instanceof Error ? e.message : JSON.stringify(e)))
   }
 })
 
@@ -167,7 +167,7 @@ bot.on('text', async (ctx) => {
     ctx.reply(`${lines.join('\n')}\n\n💬 ${comment}`)
   } catch (e) {
     console.error('[bot] text handler error:', e)
-    ctx.reply('Ошибка: ' + String(e))
+    ctx.reply('Ошибка: ' + (e instanceof Error ? e.message : JSON.stringify(e)))
   }
 })
 
