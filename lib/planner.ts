@@ -6,7 +6,7 @@
 import type { Task, Settings, ScheduleLesson } from '@/types'
 
 const GROQ_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const GROQ_MODEL = 'meta-llama/llama-3.1-8b-instruct:free'
+const GROQ_MODEL = 'meta-llama/llama-4-scout:free'
 
 interface PlannerTask {
   title: string
